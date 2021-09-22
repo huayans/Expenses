@@ -25,6 +25,10 @@ class ExpensesApp extends StatelessWidget {
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
+              button: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
         appBarTheme: AppBarTheme(
           textTheme: ThemeData.light().textTheme.copyWith(
@@ -47,7 +51,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transaction = [
-    Transaction(
+    /* Transaction(
       id: 't1',
       title: 'Novo Tênis de Corrida',
       value: 310.76,
@@ -62,39 +66,50 @@ class _MyHomePageState extends State<MyHomePage> {
       date: DateTime.now().subtract(
         Duration(days: 4),
       ),
-    ),
+    ), */
   ];
 
   List<Transaction> get _recentTransactions {
-    return _transaction.where((tr) {
-      return tr.date.isAfter(
-        DateTime.now().subtract(
-          Duration(days: 7),
-        ),
-      );
-    }).toList();
+    return _transaction.where(
+      (tr) {
+        return tr.date.isAfter(
+          DateTime.now().subtract(
+            Duration(days: 7),
+          ),
+        );
+      },
+    ).toList();
   }
 
-  _addTransaction(String title, double value) {
+  _addTransaction(String title, double value, DateTime date) {
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: title,
       value: value,
-      date: DateTime.now(),
+      date: date,
     );
-    setState(() {
-      _transaction.add(newTransaction);
-    });
+    setState(
+      () {
+        _transaction.add(newTransaction);
+      },
+    );
 
     Navigator.of(context).pop();
   }
 
+  _removeTransaction(String id) {
+    setState(() {
+      _transaction.removeWhere((tr) => tr.id == id);
+    });
+  }
+
   _openTransactionFormModal(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (ctx) {
-          return TransactionForm(_addTransaction);
-        });
+      context: context,
+      builder: (ctx) {
+        return TransactionForm(_addTransaction);
+      },
+    );
   }
 
   @override
@@ -114,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Chart(_recentTransactions),
-            TransactionList(_transaction),
+            TransactionList(_transaction, _removeTransaction),
           ],
         ),
       ),
